@@ -1035,6 +1035,8 @@ cdef class _DynamicStructReader:
         return to_python_reader(self.thisptr.get(field), self)
 
     def __getattr__(self, field):
+        parts = field.split('_')
+        field = parts[0] + ''.join(((x[0].upper() + x[1:]) if x else '_') for x in parts[1:])
         try:
             return self._get(field)
         except KjException as e:
@@ -1435,6 +1437,9 @@ cdef class _DynamicStructBuilder:
     def from_dict(self, dict d):
         for key, val in d.iteritems():
             if key != 'which':
+                parts = key.split('_')
+                key = parts[0] + ''.join(((x[0].upper() + x[1:]) if x else '_')
+                                         for x in parts[1:])
                 try:
                     self._set(key, val)
                 except Exception as e:
