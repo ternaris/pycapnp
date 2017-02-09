@@ -1464,6 +1464,7 @@ cdef class _DynamicStructBuilder:
     def __reduce_ex__(self, proto):
         return _struct_reducer, (self.schema.node.id, self.to_bytes())
 
+
 cdef class _DynamicStructPipeline:
     """Reads Cap'n Proto structs
 
@@ -2880,11 +2881,14 @@ cdef _new_message(self, kwargs, num_first_segment_words):
         msg.from_dict(kwargs)
     return msg
 
+
 class _RestorerImpl(object):
     pass
 
+
 class _StructModuleWhich(object):
     pass
+
 
 class _StructModule(object):
     def __init__(self, schema, name):
@@ -2925,6 +2929,7 @@ class _StructModule(object):
         :rtype: :class:`_DynamicStructReader`"""
         reader = _StreamFdMessageReader(file, traversal_limit_in_words, nesting_limit)
         return reader.get_root(self.schema)
+
     def read_multiple(self, file, traversal_limit_in_words = None, nesting_limit = None, skip_copy = False):
         """Returns an iterable, that when traversed will return Readers for messages.
 
@@ -2943,6 +2948,7 @@ class _StructModule(object):
         :rtype: Iterable with elements of :class:`_DynamicStructReader`"""
         reader = _MultipleMessageReader(file, self.schema, traversal_limit_in_words, nesting_limit, skip_copy)
         return reader
+
     def read_packed(self, file, traversal_limit_in_words = None, nesting_limit = None):
         """Returns a Reader for the packed object read from file.
 
@@ -2958,6 +2964,7 @@ class _StructModule(object):
         :rtype: :class:`_DynamicStructReader`"""
         reader = _PackedFdMessageReader(file, traversal_limit_in_words, nesting_limit)
         return reader.get_root(self.schema)
+
     def read_multiple_packed(self, file, traversal_limit_in_words = None, nesting_limit = None, skip_copy = False):
         """Returns an iterable, that when traversed will return Readers for messages.
 
@@ -2976,6 +2983,7 @@ class _StructModule(object):
         :rtype: Iterable with elements of :class:`_DynamicStructReader`"""
         reader = _MultiplePackedMessageReader(file, self.schema, traversal_limit_in_words, nesting_limit, skip_copy)
         return reader
+
     def read_multiple_bytes(self, buf, traversal_limit_in_words = None, nesting_limit = None):
         """Returns an iterable, that when traversed will return Readers for messages.
 
@@ -2991,6 +2999,7 @@ class _StructModule(object):
         :rtype: Iterable with elements of :class:`_DynamicStructReader`"""
         reader = _MultipleBytesMessageReader(buf, self.schema, traversal_limit_in_words, nesting_limit)
         return reader
+
     def read_multiple_bytes_packed(self, buf, traversal_limit_in_words = None, nesting_limit = None):
         """Returns an iterable, that when traversed will return Readers for messages.
 
@@ -3006,6 +3015,7 @@ class _StructModule(object):
         :rtype: Iterable with elements of :class:`_DynamicStructReader`"""
         reader = _MultipleBytesPackedMessageReader(buf, self.schema, traversal_limit_in_words, nesting_limit)
         return reader
+
     def from_bytes(self, buf, traversal_limit_in_words = None, nesting_limit = None, builder=False):
         """Returns a Reader for the unpacked object in buf.
 
@@ -3030,6 +3040,7 @@ class _StructModule(object):
         else:
             message = _FlatArrayMessageReader(buf, traversal_limit_in_words, nesting_limit)
             return message.get_root(self.schema)
+
     def from_segments(self, segments, traversal_limit_in_words = None, nesting_limit = None):
         """Returns a Reader for a list of segment bytes.
 
@@ -3041,6 +3052,7 @@ class _StructModule(object):
         """
         message = _SegmentArrayMessageReader(segments, traversal_limit_in_words, nesting_limit)
         return message.get_root(self.schema)
+
     def from_bytes_packed(self, buf, traversal_limit_in_words = None, nesting_limit = None):
         """Returns a Reader for the packed object in buf.
 
@@ -3056,6 +3068,7 @@ class _StructModule(object):
         :rtype: :class:`_DynamicStructReader`
         """
         return _PackedMessageReaderBytes(buf, traversal_limit_in_words, nesting_limit).get_root(self.schema)
+
     def new_message(self, num_first_segment_words=None, **kwargs):
         """Returns a newly allocated builder message.
 
@@ -3068,15 +3081,18 @@ class _StructModule(object):
         :rtype: :class:`_DynamicStructBuilder`
         """
         return _new_message(self, kwargs, num_first_segment_words)
+
     def from_dict(self, kwargs):
         '.. warning:: This method is deprecated and will be removed in the 0.5 release. Use the :meth:`new_message` function instead with **kwargs'
         _warnings.warn('This method is deprecated and will be removed in the 0.5 release. Use the :meth:`new_message` function instead with **kwargs', UserWarning)
         return _new_message(self, kwargs, None)
+
     def from_object(self, obj):
         '.. warning:: This method is deprecated and will be removed in the 0.5 release. Use the :meth:`_DynamicStructReader.as_builder` or :meth:`_DynamicStructBuilder.copy` functions instead'
         _warnings.warn('This method is deprecated and will be removed in the 0.5 release. Use the :meth:`_DynamicStructReader.as_builder` or :meth:`_DynamicStructBuilder.copy` functions instead', UserWarning)
         builder = _MallocMessageBuilder()
         return builder.set_root(obj)
+
 
 class _InterfaceModule(object):
     def __init__(self, schema, name):
@@ -3091,11 +3107,13 @@ class _InterfaceModule(object):
     def _new_server(self, server):
         return _DynamicCapabilityServer(self.schema, server)
 
+
 class _EnumModule(object):
     def __init__(self, schema, name):
         self.schema = schema
         for name, val in schema.enumerants.items():
             setattr(self, name, val)
+
 
 cdef class _StringArrayPtr:
     cdef StringPtr * thisptr
@@ -3251,12 +3269,14 @@ cdef class SchemaParser:
 
         return module
 
+
 cdef class _MessageBuilder:
     """An abstract base class for building Cap'n Proto messages
 
     .. warning:: Don't ever instantiate this class directly. It is only used for inheritance.
     """
     cdef schema_cpp.MessageBuilder * thisptr
+
     def __dealloc__(self):
         del self.thisptr
 
@@ -3372,6 +3392,7 @@ cdef class _MessageBuilder:
 
         return _DynamicOrphan()._init(self.thisptr.newOrphan(s.thisptr), self)
 
+
 cdef class _MallocMessageBuilder(_MessageBuilder):
     """The main class for building Cap'n Proto messages
 
@@ -3392,6 +3413,7 @@ cdef class _MallocMessageBuilder(_MessageBuilder):
             self.thisptr = new schema_cpp.MallocMessageBuilder()
         else:
             self.thisptr = new schema_cpp.MallocMessageBuilder(size)
+
 
 cdef class _MessageReader:
     """An abstract base class for reading Cap'n Proto messages
@@ -3437,6 +3459,7 @@ cdef class _MessageReader:
         :return: An AnyPointer that you can read from
         """
         return _DynamicObjectReader()._init(self.thisptr.getRootAnyPointer(), self)
+
 
 cdef class _StreamFdMessageReader(_MessageReader):
     """Read a Cap'n Proto message from a file descriptor
