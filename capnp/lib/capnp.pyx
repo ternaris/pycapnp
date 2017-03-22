@@ -866,6 +866,7 @@ cdef _to_dict(msg, bint verbose, bint ordered):
             ret = {}
         try:
             which = temp_msg_b.which()
+            ret['_which'] = which
             ret[which] = _to_dict(temp_msg_b._get(which), verbose, ordered)
         except KjException:
             pass
@@ -883,6 +884,7 @@ cdef _to_dict(msg, bint verbose, bint ordered):
             ret = {}
         try:
             which = temp_msg_r.which()
+            ret['_which'] = which
             ret[which] = _to_dict(temp_msg_r._get(which), verbose, ordered)
         except KjException:
             pass
