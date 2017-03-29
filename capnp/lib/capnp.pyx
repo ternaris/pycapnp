@@ -19,6 +19,7 @@ from cpython cimport Py_buffer
 from cpython.buffer cimport PyBUF_SIMPLE
 
 from types import ModuleType as _ModuleType
+import datetime as _datetime
 import os as _os
 import sys as _sys
 import imp as _imp
@@ -37,6 +38,8 @@ _CAPNP_VERSION_MAJOR = capnp.CAPNP_VERSION_MAJOR
 _CAPNP_VERSION_MINOR = capnp.CAPNP_VERSION_MINOR
 _CAPNP_VERSION_MICRO = capnp.CAPNP_VERSION_MICRO
 _CAPNP_VERSION = capnp.CAPNP_VERSION
+
+_EPOCH = _datetime.datetime.utcfromtimestamp(0)
 
 cdef dict _type_registry = {}
 
@@ -1442,6 +1445,10 @@ cdef class _DynamicStructBuilder:
                 parts = key.split('_')
                 key = parts[0] + ''.join(((x[0].upper() + x[1:]) if x else '_')
                                          for x in parts[1:])
+                if isinstance(val, _datetime.datetime):
+                    val = int((val - _EPOCH).total_seconds() * 1e9)
+                elif isinstance(val, _datetime.timedelta):
+                    val = int(val.total_seconds() * 1e9)
                 try:
                     self._set(key, val)
                 except Exception as e:
