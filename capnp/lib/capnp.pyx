@@ -849,17 +849,17 @@ cdef _DynamicListReader temp_list_r
 cdef _DynamicResizableListBuilder temp_list_rb
 cdef _DynamicStructBuilder temp_msg_b
 cdef _DynamicStructReader temp_msg_r
-cdef _to_dict(msg, bint verbose, bint ordered):
+cdef _to_dict(msg, bint verbose, bint ordered, bint which):
     msg_type = type(msg)
     if msg_type is _DynamicListBuilder:
         temp_list_b = msg
-        return [_to_dict(temp_list_b._get(i), verbose, ordered) for i in range(len(msg))]
+        return [_to_dict(temp_list_b._get(i), verbose, ordered, which) for i in range(len(msg))]
     elif msg_type is _DynamicListReader:
         temp_list_r = msg
-        return [_to_dict(temp_list_r._get(i), verbose, ordered) for i in range(len(msg))]
+        return [_to_dict(temp_list_r._get(i), verbose, ordered, which) for i in range(len(msg))]
     elif msg_type is _DynamicResizableListBuilder:
         temp_list_rb = msg
-        return [_to_dict(temp_list_rb._get(i), verbose, ordered) for i in range(len(msg))]
+        return [_to_dict(temp_list_rb._get(i), verbose, ordered, which) for i in range(len(msg))]
 
     if msg_type is _DynamicStructBuilder:
         temp_msg_b = msg
@@ -868,15 +868,16 @@ cdef _to_dict(msg, bint verbose, bint ordered):
         else:
             ret = {}
         try:
-            which = temp_msg_b.which()
-            ret['_which'] = which
-            ret[which] = _to_dict(temp_msg_b._get(which), verbose, ordered)
+            _which = temp_msg_b.which()
+            if which:
+                ret['_which'] = _which
+            ret[_which] = _to_dict(temp_msg_b._get(_which), verbose, ordered, which)
         except KjException:
             pass
 
         for field in temp_msg_b.schema.non_union_fields:
             if verbose or temp_msg_b._has(field):
-                ret[field] = _to_dict(temp_msg_b._get(field), verbose, ordered)
+                ret[field] = _to_dict(temp_msg_b._get(field), verbose, ordered, which)
 
         return ret
     elif msg_type is _DynamicStructReader:
@@ -886,15 +887,16 @@ cdef _to_dict(msg, bint verbose, bint ordered):
         else:
             ret = {}
         try:
-            which = temp_msg_r.which()
-            ret['_which'] = which
-            ret[which] = _to_dict(temp_msg_r._get(which), verbose, ordered)
+            _which = temp_msg_r.which()
+            if which:
+                ret['_which'] = _which
+            ret[_which] = _to_dict(temp_msg_r._get(_which), verbose, ordered, which)
         except KjException:
             pass
 
         for field in temp_msg_r.schema.non_union_fields:
             if verbose or temp_msg_r._has(field):
-                ret[field] = _to_dict(temp_msg_r._get(field), verbose, ordered)
+                ret[field] = _to_dict(temp_msg_r._get(field), verbose, ordered, which)
 
         return ret
 
@@ -1104,8 +1106,8 @@ cdef class _DynamicStructReader:
     def __repr__(self):
         return '<%s reader %s>' % (self.schema.node.displayName, <char*>strStructReader(self.thisptr).cStr())
 
-    def to_dict(self, verbose=False, ordered=False):
-        return _to_dict(self, verbose, ordered)
+    def to_dict(self, verbose=False, ordered=False, which=False):
+        return _to_dict(self, verbose, ordered, which)
 
     cpdef as_builder(self, num_first_segment_words=None):
         """A method for casting this Reader to a Builder
@@ -1436,8 +1438,8 @@ cdef class _DynamicStructBuilder:
     def __repr__(self):
         return '<%s builder %s>' % (self.schema.node.displayName, <char*>strStructBuilder(self.thisptr).cStr())
 
-    def to_dict(self, verbose=False, ordered=False):
-        return _to_dict(self, verbose, ordered)
+    def to_dict(self, verbose=False, ordered=False, which=False):
+        return _to_dict(self, verbose, ordered, which)
 
     def from_dict(self, dict d):
         for key, val in d.iteritems():
@@ -1521,8 +1523,8 @@ cdef class _DynamicStructPipeline:
     # def __repr__(self):
     #     return '<%s reader %s>' % (self.schema.node.displayName, strStructReader(self.thisptr).cStr())
 
-    def to_dict(self, verbose=False, ordered=False):
-        return _to_dict(self, verbose, ordered)
+    def to_dict(self, verbose=False, ordered=False, which=False):
+        return _to_dict(self, verbose, ordered, which)
 
 cdef class _DynamicOrphan:
     cdef _init(self, C_DynamicOrphan other, object parent):
@@ -1997,8 +1999,8 @@ cdef class _RemotePromise:
     def __dir__(self):
         return list(set(self.schema.fieldnames + tuple(dir(self.__class__))))
 
-    def to_dict(self, verbose=False, ordered=False):
-        return _to_dict(self, verbose, ordered)
+    def to_dict(self, verbose=False, ordered=False, which=False):
+        return _to_dict(self, verbose, ordered, which)
 
     cpdef cancel(self, numParents=1) except +reraise_kj_exception:
         if numParents > 0 and hasattr(self._parent, 'cancel'):
