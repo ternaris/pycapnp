@@ -42,6 +42,7 @@ capnp/version.py
 MANIFEST
 docs/_build
 
+/bundled
 /capnp/lib/capnp.cpp
 /capnp/lib/capnp.h
 /tmp
