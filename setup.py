@@ -136,7 +136,7 @@ else:
                             libraries=['capnpc', 'capnp-rpc', 'capnp', 'kj-async', 'kj'])]
 
 setup(
-    name="pycapnp",
+    name="pycapnp-for-marv",
     packages=["capnp"],
     version=VERSION,
     package_data={'capnp': ['*.pxd', '*.h', '*.capnp', 'helpers/*.pxd', 'helpers/*.h', 'includes/*.pxd', 'lib/*.pxd', 'lib/*.py', 'lib/*.pyx', 'templates/*']},
