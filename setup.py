@@ -138,14 +138,17 @@ else:
 setup(
     name="pycapnp-for-marv",
     packages=["capnp"],
-    version=VERSION,
+    version=VERSION + '-1',
     package_data={'capnp': ['*.pxd', '*.h', '*.capnp', 'helpers/*.pxd', 'helpers/*.h', 'includes/*.pxd', 'lib/*.pxd', 'lib/*.py', 'lib/*.pyx', 'templates/*']},
     ext_modules=extensions,
     cmdclass = {
         'clean': clean,
         'build_ext': build_libcapnp_ext
     },
-    install_requires=[],
+    install_requires=[
+        'cython',
+        'Jinja2>=2.7.3',
+    ],
     entry_points={
         'console_scripts' : ['capnpc-cython = capnp._gen:main']
     },
