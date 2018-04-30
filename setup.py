@@ -138,7 +138,7 @@ else:
 setup(
     name="pycapnp-for-marv",
     packages=["capnp"],
-    version=VERSION + '-1',
+    version=VERSION + '-2',
     package_data={'capnp': ['*.pxd', '*.h', '*.capnp', 'helpers/*.pxd', 'helpers/*.h', 'includes/*.pxd', 'lib/*.pxd', 'lib/*.py', 'lib/*.pyx', 'templates/*']},
     ext_modules=extensions,
     cmdclass = {
